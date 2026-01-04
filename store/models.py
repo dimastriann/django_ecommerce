@@ -1,56 +1,40 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 
-# Create your models here.
 
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    email = models.CharField(max_length=200, null=True)
+class Category(models.Model):
+    name = models.CharField(max_length=255, db_index=True)
+    slug = models.SlugField(max_length=255, unique=True)
+
+    class Meta:
+        verbose_name_plural = "categories"
+
+    def get_absolute_url(self):
+        return reverse("store:category_list", args=[self.slug])
 
     def __str__(self):
         return self.name
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    price = models.FloatField(default=0)
-    digital = models.BooleanField(default=False, null=True, blank=True)
-    # available_stock = models.FloatField(default=0)
-    # image = models.ImageField()
+    category = models.ForeignKey(
+        Category, related_name="products", on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
+    slug = models.SlugField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    in_stock = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created",)
+
+    def get_absolute_url(self):
+        return reverse("store:product_detail", args=[self.slug])
 
     def __str__(self):
-        return self.name
-
-
-class Order(models.Model):
-    name = models.CharField(max_length=100)
-    date_order = models.DateTimeField(auto_now_add=True)
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-    transaction_id = models.CharField(max_length=200, null=True)
-    # amount_total = models.FloatField(default=0)
-
-    def __str__(self):
-        return "{}-{}".format(self.name, str(self.id))
-
-
-class OrderItem(models.Model):
-    name = models.CharField(max_length=100)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity = models.FloatField(default=0)
-    # price_subtotal = models.FloatField()
-    
-
-class ShippingAddress(models.Model):
-    name = models.CharField(max_length=100)
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
-    address = models.CharField(max_length=100, null=True)
-    zip_code = models.CharField(max_length=100, null=True)
-    state = models.CharField(max_length=100, null=True)
-    city = models.CharField(max_length=100, null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
+        return self.title

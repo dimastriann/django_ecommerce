@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="bg-white p-10 rounded shadow-md text-center mt-10">
+        <h1 class="text-4xl font-bold text-green-600 mb-4">Thank you!</h1>
+        <p class="text-xl text-gray-700">Your order has been placed successfully.</p>
+        <p class="text-lg text-gray-600 mt-2">
+            Order number: <span class="font-bold">#{{ order.id }}</span>
+        </p>
+        <div class="mt-8">
+            <a href="{% url 'store:product_all' %}"
+               class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">Continue Shopping</a>
+        </div>
+    </div>
+{% endblock %}
